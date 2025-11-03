@@ -1,6 +1,6 @@
 sdc11073
 pyshark
-numpy
+numpy==1.9.0
 cython
 scapy
 scipy
