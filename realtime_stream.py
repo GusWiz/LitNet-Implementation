@@ -28,12 +28,33 @@ capture_interface = input("Please input the interface to monitor traffic from: "
 
 # Set up capture and begin listener thread
 packet_queue = Queue(maxsize=1000)
-listener = threading.Thread(target=ps.RunPacketStream, args=(capture_interface, packet_queue))
+stop_event = threading.Event()
+listener = threading.Thread(target=ps.RunPacketStream, args=(capture_interface, packet_queue, stop_event))
 listener.start()
 
 RMSEs = []
 i = 0
 start = time.time()
+threshold = -1
+
+# Set the threshold during the training phase
+while i < ADgrace:
+    packet = packet_queue.get()
+    i += 1
+    if i % 1000 == 0:
+        print(i)
+    L.curr_packet = packet
+    rmse = L.proc_next_packet()
+    if rmse > threshold:
+        threshold = rmse
+        print(f"new maximum rmse found for threshold: {rmse}")
+    if rmse == -1:
+        continue
+    RMSEs.append(rmse)
+
+print(f"The anomaly threshold has been successfully set at {threshold}")
+print("Beginning execution phase")
+
 
 # Here we process (train/execute) each individual packet.
 # In this way, each observation is discarded after performing process() method.
@@ -46,12 +67,18 @@ while True:
     rmse = L.proc_next_packet()
     if rmse == -1:
         continue
+    if rmse > threshold:
+        print(L.curr_packet)
+        print(f"RMSE for this packet is: {rmse}")
     RMSEs.append(rmse)
     if (i > 100000):
         break
 stop = time.time()
 print("Complete. Time elapsed: "+ str(stop - start))
 
+# Halt and join the listener thread
+stop_event.set()
+listener.join()
 
 # Here we demonstrate how one can fit the RMSE scores to a log-normal distribution (useful for finding/setting a cutoff threshold \phi)
 from scipy.stats import norm
