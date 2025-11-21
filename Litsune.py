@@ -1,5 +1,6 @@
 from LitFeatureExtractor import *
 from KitNET.KitNET import KitNET
+from typing import Any
 
 # MIT License
 #
@@ -27,7 +28,7 @@ class Litsune:
     def __init__(self,max_autoencoder_size=10,FM_grace_period=None,AD_grace_period=10000,learning_rate=0.1,hidden_ratio=0.75,):
         #init packet feature extractor (AfterImage)
         self.FE = FE('enp0s1')
-        self.curr_packet = Any
+        self.curr_packet: Any = None
 
         #init Kitnet
         self.AnomDetector = KitNET(self.FE.get_num_features(),max_autoencoder_size,FM_grace_period,AD_grace_period,learning_rate,hidden_ratio)
@@ -35,7 +36,10 @@ class Litsune:
     def proc_next_packet(self):
 
         # create feature vector
-        x = self.FE.proc_next_vector(self.curr_packet)
+        try: 
+            x = self.FE.proc_next_vector(self.curr_packet)
+        except Exception as e: # I think valueError in case curr_packet is None ? This probably isnt really necessary at all but good practice ig
+            print(f"could not process packet: {e}")
 
         if len(x) == 0:
             return -1 #Error or no packets left
