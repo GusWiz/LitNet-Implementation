@@ -2,7 +2,7 @@ class Packet:
     """
     Class 
     """
-    def __init__(self, packet):
+    def __init__(self, src):
         """
         Constructor for Packet object.
         Args:
@@ -11,10 +11,10 @@ class Packet:
             year (int): 
             color (str): 
         """
-        self.packet = packet
+        self.src = src
         self.anomalyCount = 0
-
-        self.source = packet.ip # idk how to get packet ip rn 
+        
+         # idk how to get packet ip rn 
 
     
         def anomolyDetected(): 

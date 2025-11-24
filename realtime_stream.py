@@ -49,6 +49,7 @@ while i < ADgrace:
     if rmse > threshold:
         threshold = rmse
         print(f"new maximum rmse found for threshold: {rmse}")
+        
     if rmse == -1:
         continue
     RMSEs.append(rmse)
@@ -69,9 +70,13 @@ while True:
     if rmse == -1:
         continue
     if rmse > threshold:
-        Packet 
         print(L.curr_packet)
         print(f"RMSE for this packet is: {rmse}")
+        if L.currentSrc in L.anomList:
+            L.anomList[L.currentSrc] += 1
+        else:
+            L.anomList[L.currentSrc] = 1
+
     RMSEs.append(rmse)
     if (i > 100000):
         break

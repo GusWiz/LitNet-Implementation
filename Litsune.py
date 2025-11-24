@@ -30,6 +30,9 @@ class Litsune:
         self.FE = FE('enp0s1')
         self.curr_packet: Any = None
 
+        self.currentSrc = None
+        self.anomList = {}
+
         #init Kitnet
         self.AnomDetector = KitNET(self.FE.get_num_features(),max_autoencoder_size,FM_grace_period,AD_grace_period,learning_rate,hidden_ratio)
 
@@ -37,7 +40,7 @@ class Litsune:
 
         # create feature vector
         try: 
-            x = self.FE.proc_next_vector(self.curr_packet)
+            x, self.currentSrc = self.FE.proc_next_vector(self.curr_packet)
         except Exception as e: # I think valueError in case curr_packet is None ? This probably isnt really necessary at all but good practice ig
             print(f"could not process packet: {e}")
 
