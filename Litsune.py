@@ -50,3 +50,8 @@ class Litsune:
         # process KitNET
         return self.AnomDetector.process(x)  # will train during the grace periods, then execute on all the rest.
 
+    def update_anomList(self):
+        if self.currentSrc in self.anomList:
+            self.anomList[self.currentSrc] += 1
+        else:
+            self.anomList[self.currentSrc] = 1
