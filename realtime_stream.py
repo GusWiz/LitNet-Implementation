@@ -72,10 +72,11 @@ while True:
     if rmse > threshold:
         print(L.curr_packet)
         print(f"RMSE for this packet is: {rmse}")
-        if L.currentSrc in L.anomList:
-            L.anomList[L.currentSrc] += 1
-        else:
-            L.anomList[L.currentSrc] = 1
+        L.update_anomList()
+        # if L.currentSrc in L.anomList:
+        #     L.anomList[L.currentSrc] += 1
+        # else:
+        #     L.anomList[L.currentSrc] = 1
 
     RMSEs.append(rmse)
     if (i > 100000):
