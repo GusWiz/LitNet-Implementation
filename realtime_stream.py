@@ -58,7 +58,11 @@ while i < ADgrace:
 print(f"The anomaly threshold has been successfully set at {threshold}")
 print("Beginning execution phase")
 
-
+mean_RMSE = np.mean(RMSEs)
+std_RMSE = np.std(RMSEs)
+k = 3
+threshold = mean_RMSE + (k * std_RMSE)
+print(f"Threshold set at {threshold:.6f} (mean : {mean_RMSE:.6f}, std : {std_RMSE:.6f}, k={k})")
 # Here we process (train/execute) each individual packet.
 # In this way, each observation is discarded after performing process() method.
 while True:
