@@ -59,10 +59,9 @@ print("Beginning execution phase")
 mean_RMSE = np.mean(RMSEs)
 std_RMSE = np.std(RMSEs)
 k = 3 
-bottom_threshold = mean_RMSE + (k * std_RMSE)
-~k = 2
-top_threshold = mean_RMSE + (~k * std_RMSE)
-print(f"Threshold range set at {bottom_threshold:.6f}-{top_threshold:.6f} (mean : {mean_RMSE:.6f}, std : {std_RMSE:.6f}, k={k})")
+threshold = mean_RMSE + (k * std_RMSE)
+
+print(f"Threshold range set at {threshold:.6f} (mean : {mean_RMSE:.6f}, std : {std_RMSE:.6f}, k={k})")
 # Here we process (train/execute) each individual packet.
 # In this way, each observation is discarded after performing process() method.
 while True:
