@@ -20,6 +20,7 @@ import time
 maxAE = 10 #maximum size for any autoencoder in the ensemble layer
 FMgrace = 5000 #the number of instances taken to learn the feature mapping (the ensemble's architecture)
 ADgrace = 50000 #the number of instances used to train the anomaly detector (ensemble itself)
+capture_limit = 100000
 
 # Build Litsune
 L = Litsune(max_autoencoder_size=maxAE,FM_grace_period=FMgrace,AD_grace_period=ADgrace)
@@ -27,9 +28,9 @@ L = Litsune(max_autoencoder_size=maxAE,FM_grace_period=FMgrace,AD_grace_period=A
 capture_interface = input("Please input the interface to monitor traffic from: ")
 
 # Set up capture and begin listener thread
-packet_queue = Queue(maxsize=1000)
+packet_queue = Queue(maxsize=capture_limit)
 stop_event = threading.Event()
-listener = threading.Thread(target=ps.RunPacketStream, args=(capture_interface, packet_queue, stop_event))
+listener = threading.Thread(target=ps.RunPacketStream, args=(capture_limit, capture_interface, packet_queue, stop_event))
 listener.start()
 
 RMSEs = []
@@ -71,7 +72,7 @@ while True:
         print(L.curr_packet)
         print(f"RMSE for this packet is: {rmse}")
     RMSEs.append(rmse)
-    if (i > 100000):
+    if (i > capture_limit):
         break
 stop = time.time()
 print("Complete. Time elapsed: "+ str(stop - start))
