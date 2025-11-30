@@ -28,3 +28,4 @@ build/
 *.prof
 *.dat
 env
+ExampleOutTest.png
