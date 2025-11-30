@@ -22,7 +22,7 @@ maxAE = 10 #maximum size for any autoencoder in the ensemble layer
 FMgrace = 5000 #the number of instances taken to learn the feature mapping (the ensemble's architecture)
 ADgrace = 50000 #the number of instances used to train the anomaly detector (ensemble itself)
 
-BLOCK_THRESHOLD = 10 #num of strikes before blocking
+BLOCK_THRESHOLD = 50 #num of strikes before blocking
 BLOCK_DURATION = 60 #duration to block IP in seconds
 
 blocked_ips = set() #currently blocked IPs
@@ -71,12 +71,12 @@ while True:
     i+=1
 
     #unblock any IPs whose block duration has expired
-    now = time.time()
+    '''now = time.time()
     for ip in list(unblock_schedule.keys()):
         if now >= unblock_schedule[ip]:
             unblock_ip(ip)
             blocked_ips.remove(ip)
-            del unblock_schedule[ip]
+            del unblock_schedule[ip]'''
 
     if i % 1000 == 0:
         print(i)
@@ -88,11 +88,10 @@ while True:
         print(L.curr_packet)
         print(f"RMSE for this packet is: {rmse}")
         L.update_anomList()
-
-    #this ensures that any source IP with ≥ 10 anomalies gets blocked for 60 seconds
-    src_ip = L.currentSrc
-    if src_ip and src_ip not in blocked_ips:
-        if L.anomList.get(src_ip, 0) >= BLOCK_THRESHOLD:
+        #check count of anomalies for this source IP
+        src_ip = L.currentSrc
+        if L.anomList[src_ip] >= BLOCK_THRESHOLD:
+            print(f"[ALERT] Source IP {src_ip} has reached {L.anomList[src_ip]} threshold.")
             block_ip(src_ip)
             blocked_ips.add(src_ip)
             unblock_schedule[src_ip] = time.time() + BLOCK_DURATION

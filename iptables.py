@@ -1,7 +1,5 @@
 import subprocess
 
-import subprocess
-
 def block_ip(ip: str):
     try:
         subprocess.run(["iptables", "-A", "INPUT", "-s", ip, "-j", "DROP"], check=True)
