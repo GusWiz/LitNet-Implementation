@@ -20,3 +20,4 @@ nest-asyncio
 scikit-learn
 hyperopt
 seaborn
+loguru

@@ -42,11 +42,11 @@ class Litsune:
         try: 
             x, self.currentSrc = self.FE.proc_next_vector(self.curr_packet)
         except Exception as e: # I think valueError in case curr_packet is None ? This probably isnt really necessary at all but good practice ig
-            print(f"could not process packet: {e}")
+            logger.error(f"Packet processing failure: {e}")
 
         if len(x) == 0:
             return -1 #Error or no packets left
-
+        
         # process KitNET
         return self.AnomDetector.process(x)  # will train during the grace periods, then execute on all the rest.
 
