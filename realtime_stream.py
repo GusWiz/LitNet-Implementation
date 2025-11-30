@@ -36,7 +36,7 @@ RMSEs = []
 i = 0
 start = time.time()
 threshold = -1
-
+th = []
 # Set the threshold during the training phase
 while i < ADgrace:
     packet = packet_queue.get()
@@ -48,17 +48,18 @@ while i < ADgrace:
     if rmse > threshold:
         threshold = rmse
         print(f"new maximum rmse found for threshold: {rmse}")
+        th.append(rmse)
     if rmse == -1:
         continue
     RMSEs.append(rmse)
 
-print(f"The anomaly threshold has been successfully set at {threshold}")
+# print(f"The anomaly threshold has been successfully set at {threshold}")
 print("Beginning execution phase")
 
 # Setting values for Standard Deviation formula 
-mean_RMSE = np.mean(RMSEs)
-std_RMSE = np.std(RMSEs)
-k = 3 
+mean_RMSE = np.mean(th)
+std_RMSE = np.std(th)
+k = 2.8 
 threshold = mean_RMSE + (k * std_RMSE)
 
 print(f"Threshold range set at {threshold:.6f} (mean : {mean_RMSE:.6f}, std : {std_RMSE:.6f}, k={k})")
@@ -74,7 +75,7 @@ while True:
     if rmse == -1:
         continue
     if rmse > threshold:
-        print(L.curr_packet)
+        # print(L.curr_packet)
         print(f"RMSE for this packet is: {rmse}")
     RMSEs.append(rmse)
     if (i > 100000):
@@ -103,4 +104,4 @@ plt.ylabel("RMSE (log scaled)")
 plt.xlabel("Time elapsed [min]")
 figbar=plt.colorbar()
 figbar.ax.set_ylabel('Log Probability\n ', rotation=270)
-plt.savefig("ExampleOutTest.png")
+plt.savefig("ExampleOutTest_thList.png")
