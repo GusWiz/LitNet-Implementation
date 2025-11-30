@@ -4,6 +4,7 @@ import packet_stream as ps
 from queue import Queue
 import threading
 import time
+import Packet
 
 ##############################################################################
 # Kitsune a lightweight online network intrusion detection system based on an ensemble of autoencoders (kitNET).
@@ -49,6 +50,7 @@ while i < ADgrace:
     if rmse > threshold:
         threshold = rmse
         print(f"new maximum rmse found for threshold: {rmse}")
+        
     if rmse == -1:
         continue
     RMSEs.append(rmse)
@@ -71,6 +73,8 @@ while True:
     if rmse > threshold:
         print(L.curr_packet)
         print(f"RMSE for this packet is: {rmse}")
+        L.update_anomList()
+
     RMSEs.append(rmse)
     if (i > capture_limit):
         break

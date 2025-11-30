@@ -29,3 +29,5 @@ build/
 *.dat
 env
 ExampleOutTest.png
+
+venv
