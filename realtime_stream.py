@@ -49,7 +49,6 @@ while i < ADgrace:
         continue
     RMSEs.append(rmse)
 
-# print(f"The anomaly threshold has been successfully set at {threshold}")
 print("Beginning execution phase")
 
 # Setting values for Standard Deviation formula 
@@ -71,7 +70,7 @@ while True:
     if rmse == -1:
         continue
     if rmse > threshold:
-        # print(L.curr_packet)
+        print(L.curr_packet)
         print(f"RMSE for this packet is: {rmse}")
     RMSEs.append(rmse)
     if (i > 100000):
@@ -100,4 +99,4 @@ plt.ylabel("RMSE (log scaled)")
 plt.xlabel("Time elapsed [min]")
 figbar=plt.colorbar()
 figbar.ax.set_ylabel('Log Probability\n ', rotation=270)
-plt.savefig("ExampleOutTest_thList.png")
+plt.savefig("ExampleOutTest.png")
