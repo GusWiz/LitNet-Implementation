@@ -36,7 +36,7 @@ RMSEs = []
 i = 0
 start = time.time()
 threshold = -1
-th = []
+
 # Set the threshold during the training phase
 while i < ADgrace:
     packet = packet_queue.get()
@@ -45,10 +45,6 @@ while i < ADgrace:
         print(i)
     L.curr_packet = packet
     rmse = L.proc_next_packet()
-    if rmse > threshold:
-        threshold = rmse
-        print(f"new maximum rmse found for threshold: {rmse}")
-        th.append(rmse)
     if rmse == -1:
         continue
     RMSEs.append(rmse)
@@ -57,8 +53,8 @@ while i < ADgrace:
 print("Beginning execution phase")
 
 # Setting values for Standard Deviation formula 
-mean_RMSE = np.mean(th)
-std_RMSE = np.std(th)
+mean_RMSE = np.mean(RMSEs)
+std_RMSE = np.std(RMSEs)
 k = 2.8 
 threshold = mean_RMSE + (k * std_RMSE)
 
