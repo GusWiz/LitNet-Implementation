@@ -96,7 +96,8 @@ class FE:
         try:
             return self.nstat.updateGetStats(IPtype, srcMAC, dstMAC, srcIP, srcproto, dstIP, dstproto,
                                                 int(framelen),
-                                                float(timestamp))
+                                                float(timestamp)), srcIP
+        
         except Exception as e:
             print(e)
             return []
