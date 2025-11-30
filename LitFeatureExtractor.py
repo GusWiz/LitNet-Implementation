@@ -83,10 +83,6 @@ class FE:
                     srcIP = packet.src  # src MAC
                     dstIP = packet.dst  # dst MAC
 
-                logger.debug(
-                    f"Packet src={srcIP}:{srcproto}, dst={dstIP}:{dstproto}, "
-                    f"MAC={srcMAC}->{dstMAC}, length={framelen}, IPtype={IPtype}"
-                )
 
         except Exception as e:
             logger.exception(f"Error parsing packet: {e}")
