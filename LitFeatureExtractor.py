@@ -1,7 +1,7 @@
 #Check if cython code has been compiled
 import os
 import subprocess
-from LogConfig import logger
+from loguru import logger
 use_extrapolation=False #experimental correlation code
 if use_extrapolation:
     logger.info("Importing AfterImage Cython Library")

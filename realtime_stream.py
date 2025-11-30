@@ -5,7 +5,7 @@ from queue import Queue
 import threading
 import time
 import Packet
-from LogConfig import logger
+from loguru import logger
 
 ##############################################################################
 # Kitsune a lightweight online network intrusion detection system based on an ensemble of autoencoders (kitNET).
@@ -44,11 +44,11 @@ threshold = -1
 
 # Set the threshold during the training phase
 logger.info("Beginning training phase")
-while i < ADgrace:
+while i < ADgrace + FMgrace:
     packet = packet_queue.get()
     i += 1
     if i % 1000 == 0:
-        logger.info(f"Training progress: {i}/{ADgrace}")
+        logger.info(f"Training progress: {i}/{ADgrace + FMgrace}")
     L.curr_packet = packet
     rmse = L.proc_next_packet()
     if rmse > threshold:
