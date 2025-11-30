@@ -74,7 +74,6 @@ while True:
         continue
     if rmse > threshold:
         print(L.curr_packet)
-        print(L.curr_packet)
         print(f"RMSE for this packet is: {rmse}")
         L.update_anomList()
 
