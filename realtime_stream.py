@@ -46,8 +46,6 @@ RMSEs = []
 i = 0
 start = time.time()
 threshold = -1
-th = -1
-count = 0.0
 
 # Set the threshold during the training phase
 while i < ADgrace + FMgrace:
@@ -57,19 +55,15 @@ while i < ADgrace + FMgrace:
         logger.info(f"Training progress: {i}/{ADgrace + FMgrace}")
     L.curr_packet = packet
     rmse = L.proc_next_packet()
-    if rmse > threshold:
-        th += rmse
-        count += 1
-        logger.info(f"New maximum RMSE found. Updated threshold: {rmse}")
     if rmse == -1:
         continue
     RMSEs.append(rmse)
 
-mean = th/count
-std_rmse = np.std(rmse)
+mean = np.mean(RMSEs)
+std_rmse = np.std(RMSEs)
 k = 2
 
-threshold = mean - (k * std_rmse)
+threshold = mean + (k * std_rmse)
 logger.info("Beginning execution phase")
 logger.info(f"Threshold range set at {threshold:.6f} (mean : {mean:.6f}, std : {std_rmse:.6f}, k={k})")
 # Here we process (train/execute) each individual packet.
