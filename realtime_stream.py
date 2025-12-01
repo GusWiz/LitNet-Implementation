@@ -4,7 +4,7 @@ import packet_stream as ps
 from queue import Queue
 import threading
 import time
-import Packet
+from iptables import block_ip, unblock_ip
 
 ##############################################################################
 # Kitsune a lightweight online network intrusion detection system based on an ensemble of autoencoders (kitNET).
@@ -20,8 +20,13 @@ import Packet
 # KitNET params:
 maxAE = 10 #maximum size for any autoencoder in the ensemble layer
 FMgrace = 5000 #the number of instances taken to learn the feature mapping (the ensemble's architecture)
-ADgrace = 50000 #the number of instances used to train the anomaly detector (ensemble itself)
-capture_limit = 100000
+ADgrace = 10000 #the number of instances used to train the anomaly detector (ensemble itself)
+
+BLOCK_THRESHOLD = 50 #num of strikes before blocking
+BLOCK_DURATION = 60 #duration to block IP in seconds
+
+blocked_ips = set() #currently blocked IPs
+unblock_schedule = {} #IP -> unblock time
 
 # Build Litsune
 L = Litsune(max_autoencoder_size=maxAE,FM_grace_period=FMgrace,AD_grace_period=ADgrace)
@@ -41,7 +46,7 @@ threshold = -1
 
 
 # Set the threshold during the training phase
-while i < ADgrace:
+while i < ADgrace + FMgrace:
     packet = packet_queue.get()
     i += 1
     if i % 1000 == 0:
@@ -66,6 +71,15 @@ print(f"Threshold range set at {threshold:.6f} (mean : {mean_RMSE:.6f}, std : {s
 while True:
     packet = packet_queue.get()
     i+=1
+
+    #unblock any IPs whose block duration has expired
+    '''now = time.time()
+    for ip in list(unblock_schedule.keys()):
+        if now >= unblock_schedule[ip]:
+            unblock_ip(ip)
+            blocked_ips.remove(ip)
+            del unblock_schedule[ip]'''
+
     if i % 1000 == 0:
         print(i)
     L.curr_packet = packet
@@ -76,9 +90,18 @@ while True:
         print(L.curr_packet)
         print(f"RMSE for this packet is: {rmse}")
         L.update_anomList()
+        #check count of anomalies for this source IP
+        src_ip = L.currentSrc
+        if L.anomList[src_ip] >= BLOCK_THRESHOLD:
+            if src_ip not in blocked_ips:
+                print(f"[ALERT] Source IP {src_ip} has reached {L.anomList[src_ip]} threshold.")
+                block_ip(src_ip)
+                blocked_ips.add(src_ip)
+                unblock_schedule[src_ip] = time.time() + BLOCK_DURATION
+                print(f"[BLOCKED] {src_ip} for 60 seconds")
 
     RMSEs.append(rmse)
-    if (i > capture_limit):
+    if (i > 25000):
         break
 stop = time.time()
 print("Complete. Time elapsed: "+ str(stop - start))
