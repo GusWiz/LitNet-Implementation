@@ -1,7 +1,7 @@
 #Check if cython code has been compiled
 import os
 import subprocess
-from loguru import logger
+from LogConfig import logger
 
 use_extrapolation=False #experimental correlation code
 if use_extrapolation:

@@ -1,7 +1,7 @@
 import pyshark
 from queue import Queue
 from threading import Event
-from loguru import logger
+from LogConfig import logger
 
 """This file handles the streaming of packets into a shared queue"""
 
