@@ -89,7 +89,7 @@ while True:
         continue
     if rmse > threshold:
         logger.warning(f"Anomolous packet RMSE for this packet is: {rmse}")
-        logger.warning(f"Packet details: {L.curr_packet}")
+        logger.warning(f"Packet details: {L.currentSrc}")
         L.update_anomList()
         #check count of anomalies for this source IP
         src_ip = L.currentSrc
