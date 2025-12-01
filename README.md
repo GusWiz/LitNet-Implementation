@@ -73,3 +73,13 @@ This paper examines structural weaknesses in machine-learning–based Network In
 ### NIDH — *Network Intrusion Detection Hierarchy: A Model for Gathering Attack Intelligence*
 This work proposes a hierarchical, distributed architecture for network intrusion detection inspired by systems such as Squid’s proxy network. It describes how trusted nodes can collaboratively gather, share, and refine attack intelligence, forming a scalable and resilient infrastructure. The model offers conceptual foundations for enhancing systems like Litsune through distributed detection and coordinated threat response.  
 **Link:** https://www.jstor.org/stable/26485923
+
+## Sample Runs Against DoS Attack
+
+Below are example outputs from Litsune when detecting and responding to a DoS attack.
+
+### DoS Attack - Run 1
+![DoS Anomaly Spike](ss1.png)
+
+### DoS Attack - Run 2
+![DoS Blocking](ss2.png)
