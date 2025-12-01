@@ -34,9 +34,9 @@ L = Litsune(max_autoencoder_size=maxAE,FM_grace_period=FMgrace,AD_grace_period=A
 capture_interface = input("Please input the interface to monitor traffic from: ")
 
 # Set up capture and begin listener thread
-packet_queue = Queue(maxsize=capture_limit)
+packet_queue = Queue(maxsize=1000)
 stop_event = threading.Event()
-listener = threading.Thread(target=ps.RunPacketStream, args=(capture_limit, capture_interface, packet_queue, stop_event))
+listener = threading.Thread(target=ps.RunPacketStream, args=(capture_interface, packet_queue, stop_event))
 listener.start()
 
 RMSEs = []
