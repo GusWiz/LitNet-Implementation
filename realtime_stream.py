@@ -46,6 +46,7 @@ RMSEs = []
 i = 0
 start = time.time()
 threshold = -1
+count = 0.0
 
 # Set the threshold during the training phase
 while i < ADgrace + FMgrace:
@@ -55,12 +56,15 @@ while i < ADgrace + FMgrace:
         logger.info(f"Training progress: {i}/{ADgrace + FMgrace}")
     L.curr_packet = packet
     rmse = L.proc_next_packet()
-        
+    if rmse > threshold:
+        threshold += rmse
+        count += 1
+        logger.info(f"New maximum RMSE found. Updated threshold: {rmse}")
     if rmse == -1:
         continue
     RMSEs.append(rmse)
 
-mean = np.mean(rmse)
+mean = threshold/count
 std_rmse = np.std(rmse)
 k = 2
 
