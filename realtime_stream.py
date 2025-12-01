@@ -5,6 +5,7 @@ from queue import Queue
 import threading
 import time
 from iptables import block_ip, unblock_ip
+from loguru import logger
 
 ##############################################################################
 # Kitsune a lightweight online network intrusion detection system based on an ensemble of autoencoders (kitNET).
