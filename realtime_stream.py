@@ -6,6 +6,7 @@ import threading
 import time
 from iptables import block_ip, unblock_ip
 from LogConfig import logger
+import heapq 
 
 ##############################################################################
 # Kitsune a lightweight online network intrusion detection system based on an ensemble of autoencoders (kitNET).
@@ -46,6 +47,7 @@ RMSEs = []
 i = 0
 start = time.time()
 threshold = -1
+th = []
 
 # Set the threshold during the training phase
 while i < ADgrace + FMgrace:
@@ -55,11 +57,12 @@ while i < ADgrace + FMgrace:
         logger.info(f"Training progress: {i}/{ADgrace + FMgrace}")
     L.curr_packet = packet
     rmse = L.proc_next_packet()
-    if rmse == -1:
+    if rmse == -1 or rmse == 0:
         continue
     RMSEs.append(rmse)
+new_list = np.sort(RMSEs)
 
-mean = np.mean(RMSEs)
+mean = np.mean(heapq.nlargest(50, RMSEs))
 std_rmse = np.std(RMSEs)
 k = 2
 
