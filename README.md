@@ -11,6 +11,7 @@ traffic, Litsune is a "live" version of Kitsune that reads incoming traffic thro
 from individual packets, then passes that information to KitNET's layer of autoencoders.
 
 This can be seen in the following diagram:
+![Concept](Litsune_Concept.png)
 
 ## Dependencies
 The necessary dependencies are listed in `requirements.txt`: use `pip install -r requirements.txt` to install all suitable versions.
