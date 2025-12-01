@@ -1,91 +1,75 @@
-# Network Intrusion Detection System
+# Litsune: A Network Intrusion Protection System
 
-With regard to the latest developments in the ISO/IEEE 11073 service-oriented device connectivity (SDC) its important to not leave possible security and safety risks of this new communication protocol out of consideration. Therefore the basic idea of this project (carried out during the author's bachelor thesis) was to improve the security as well as the safety of sdc connected medical devices with ML based anomaly detection. 
-The concept is illustrated in the following chart: 
-![Concept](img/concept.svg)
-So the safety and security system is itemized in two anomaly detectors: one network intrusion detection system  (content of this repository) and one log/sensor anomaly detector. 
-While the nids runs directly on the switch that interconnects different medical devices, the log anomaly detector runs in the backend. 
+This project is an extension and reworking of Kitsune (*Mirsky, Doitshman, Elovici and Shabtai*) 
+by Andrew Lockett, Aaron Siemsen, Gustavo Hernandez, Aldo Guerrero, and Brian Lee.
+
+Litsune is an AI-powered intrusion prevention system built on KitNET, a lightweight model designed
+to run in realtime on limited hardware for enhanced network security,
+
+Whereas its predecessor, Kitsune, was built primarily for offline detection through packet capture files of previous
+traffic, Litsune is a "live" version of Kitsune that reads incoming traffic through pyshark, parses features of interest
+from individual packets, then passes that information to KitNET's layer of autoencoders.
+
+This can be seen in the following diagram:
+![Concept](img/Litsune%20Concept.png)
 
 ## Dependencies
-The necessary dependencies are listed in `requirements.txt`: use `pip install -r requirements.txt` to install all suitable versions. 
-Additionally wireshark or rather tshark has to be installed and added to the system path. 
+The necessary dependencies are listed in `requirements.txt`: use `pip install -r requirements.txt` to install all suitable versions.
+Additionally, IPTables and tshark have to be installed and added to the system path.
 
-## Underlying papers and informations
+## Running Litsune
 
-+ code is based on the [paper](https://arxiv.org/abs/1802.09089) and [implementation](https://github.com/ymirsky/Kitsune-py)
-+ similiar project but blockchain based can be found [here](https://github.com/KevinTuncer/sdc-sniffer)
-+ [Survey of Network Intrusion Detection Methods from the Perspective of the Knowledge Discovery in Databases Process](https://arxiv.org/abs/2001.09697)
-+ [SOME/IP Intrusion Detection using Deep Learning-based Sequential Models in Automotive Ethernet Networks](https://arxiv.org/abs/2108.08262)
-    + SOME/IP is automotive equivalente for service oriented communication
-    + Recurrent Neural Network 
-    + synthetical dataset generator
-    + supervised learning, therefore not able to detect new unknown attacks 
-+ [A Distributed Multi-Approach Intrusion Detection System for Web Services](https://dl.acm.org/doi/abs/10.1145/1854099.1854147)
-    + static and dynamic anomaly detection (Hidden Markov Model)
-    + lightway NIDS that works directly on web servers
-    + system only inspects the payload (soap messages)
-+ [A Method for Intrusion Detection in Web Services Based on Time Series](https://ieeexplore.ieee.org/document/7129383)
-    + statistical model predicts the range of coming soap message sizes
-    + if actual soap message size is out of this range its considered as an anomaly 
-    + only one feature: soap message size 
-+ [Federated Learning for Internet of Things: A Federated Learning Framework for On-device Anomaly Data Detection](https://arxiv.org/abs/2106.07976)
-    + Deep Autoencoders
-    + Framework to test it on a Raspberry Pi or Nvidia Jetson Nano
-+ [An Intrusion Detection System for Internet of Medical Things](https://ieeexplore.ieee.org/document/9204697)
-    + polynomal regression on physiological sensor data to predict next datapoints 
-    + if actual sensor data highly deviates from the predicted one it gets considered as anomaly 
-    + model gets executed in distributed manner
-+ [On Generating Network Traffic Datasets with Synthetic Attacks for Intrusion Detection](https://arxiv.org/abs/1905.00304)
-    + code can be found [here](https://github.com/tklab-tud/ID2T)
-+ comparison of different packet crafting and sniffing libraries can be found [here](http://libtins.github.io/benchmark/)
-    + faster alternative to pyshark: [Packet capture on Windows without a kernel driver](https://github.com/nospaceships/raw-socket-sniffer)
-+ different open source implementations of the ISO/IEEE 11073 SDC
-    + [c++ version](https://github.com/surgitaix/sdclib)
-    + [python version](https://github.com/Draegerwerk/sdc11073)
+To try running Litsune on your machine, you can use the provided example file, realtime_stream.py. Upon running 
+realtime_stream.py you will be prompted for the name of the interface you would like to capture traffic from. 
+With no changes to this the script, the model will be in training mode for the first 50,000 captured packets, then 
+automatically end the capture after 100,000 packets. When capture ceases, there will be an output graph of the anomaly
+scores saved as ExampleOutTest.png 
+
+*Example* 
+
+`python realtime_stream.py`
 
 
-## Usage steps 
+## Contributions
 
-**offline and online NIDS**
+### Session Tracking (by Aaron)
+- Implemented per-IP session tracking for anomalous packets.
+- Counts the number of anomalies triggered by each source IP.
+- Provides the basis for deciding when to apply `iptables` blocks.
 
-+ run `NIDS_offline.py` to train and execute the model on a dataset
-+ run `NIDS_online.py` to train the model on a trainingset and execute it on live captured data
-+ `Kitsune.py` specifies the training and execution structure of the model which is defined in `KitNET`
+---
 
-**Tuning hyperparameter** 
+### Real-time Traffic Streaming (by Andrew)
+- Added real-time traffic capture using PyShark.
+- Enables continuous packet ingestion for the detection loop.
 
-+ `hyperparaTune.py` is based on the library [hyperopt](https://github.com/hyperopt/hyperopt) which uses  Bayesian optimization 
+---
 
-**Adjusting features**
+### Logging System (by Brian)
+- Replaced all `print()` statements with a structured `loguru`-based logging system.
+- Added persistent log files for runtime messages and errors.
+- Logs now include anomalies, system events, and exceptions.
 
-+ `FeatureExtractor.py`: uses scapy or tshark under the hood to extract meta data like srcIP, dstIP, etc. from the packets
-+ `netStat.py`: uses the extracted meta data to calculate statistical features 
-+ `AfterImage.py`: is used to calculate basic statistical features 
+---
 
-**Synthetical data generation** (`data_sdc11073`)
+### IPTables Rule Creation (by Aldo)
+- Added automatic IP blocking using `iptables` based on anomaly scores.
+- Implemented `block_ip()` and `unblock_ip()` helper functions.
+- Integrated dynamic blocking into the real-time detection pipeline.
 
-+ `fictEnvironments.py` initializes different clients and a provider (specified in `mdib_OPtable.xml`) as well as the communication between them
-+ run `dataGen.py` to capture the data transmitted between clients and providers 
-+ the saved file can be labeld in `dataLabeling.py` to evaluate the model later
+---
 
-## Results/Evaluation
+### Updated Threshold Calculation (by Gustavo)
+- Adopted a new thresholding approach based on the maximum training-set threshold observed.
+- Refined final thresholds using a standard deviation–based formula for improved stability.
 
-**Root Mean Square Error and Threshold**
 
-**Denial of Service Attack**
-![DoSRmse](img/DoSRMSE.png)
-**Portscan Attack**
-![PortscanRMSE](img/PortscanRMSE.png)
+## Underlying Papers and References
 
-**Metrics, runtime and required resources**
+### Liuer Mihou — *A Practical Framework for Generating and Evaluating Grey-box Adversarial Attacks against NIDS*
+This paper examines structural weaknesses in machine-learning–based Network Intrusion Detection Systems (NIDS), including those similar to Kitsune. It demonstrates how these models can be vulnerable to grey-box adversarial attacks and introduces a framework for generating such attacks. The framework enables training on more diverse and realistic adversarial scenarios, improving the robustness of NIDS models.  
+**Link:** https://arxiv.org/pdf/2204.06113
 
-| Metrics  | Denial of Service Attack | Portscan Attack |
-| -------- | ------------------------ | --------------- |
-| TPR      | 0.9952 | 0.9990 |
-| FPR      | 0.0019 | 0.0004 |
-| F-Score  | 0.9966 | 0.9975 |
-
-+ runtime (on CPU): 469 Pakets/s
-+ resources: 152 MB
-
-For limitations and further improvements, see `TODO.txt`
+### NIDH — *Network Intrusion Detection Hierarchy: A Model for Gathering Attack Intelligence*
+This work proposes a hierarchical, distributed architecture for network intrusion detection inspired by systems such as Squid’s proxy network. It describes how trusted nodes can collaboratively gather, share, and refine attack intelligence, forming a scalable and resilient infrastructure. The model offers conceptual foundations for enhancing systems like Litsune through distributed detection and coordinated threat response.  
+**Link:** https://www.jstor.org/stable/26485923
