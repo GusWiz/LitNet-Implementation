@@ -20,7 +20,7 @@ from iptables import block_ip, unblock_ip
 # KitNET params:
 maxAE = 10 #maximum size for any autoencoder in the ensemble layer
 FMgrace = 5000 #the number of instances taken to learn the feature mapping (the ensemble's architecture)
-ADgrace = 50000 #the number of instances used to train the anomaly detector (ensemble itself)
+ADgrace = 10000 #the number of instances used to train the anomaly detector (ensemble itself)
 
 BLOCK_THRESHOLD = 50 #num of strikes before blocking
 BLOCK_DURATION = 60 #duration to block IP in seconds
@@ -45,7 +45,7 @@ start = time.time()
 threshold = -1
 
 # Set the threshold during the training phase
-while i < ADgrace:
+while i < ADgrace + FMgrace:
     packet = packet_queue.get()
     i += 1
     if i % 1000 == 0:
@@ -91,14 +91,15 @@ while True:
         #check count of anomalies for this source IP
         src_ip = L.currentSrc
         if L.anomList[src_ip] >= BLOCK_THRESHOLD:
-            print(f"[ALERT] Source IP {src_ip} has reached {L.anomList[src_ip]} threshold.")
-            block_ip(src_ip)
-            blocked_ips.add(src_ip)
-            unblock_schedule[src_ip] = time.time() + BLOCK_DURATION
-            print(f"[BLOCKED] {src_ip} for 60 seconds")
+            if src_ip not in blocked_ips:
+                print(f"[ALERT] Source IP {src_ip} has reached {L.anomList[src_ip]} threshold.")
+                block_ip(src_ip)
+                blocked_ips.add(src_ip)
+                unblock_schedule[src_ip] = time.time() + BLOCK_DURATION
+                print(f"[BLOCKED] {src_ip} for 60 seconds")
 
     RMSEs.append(rmse)
-    if (i > 100000):
+    if (i > 25000):
         break
 stop = time.time()
 print("Complete. Time elapsed: "+ str(stop - start))
