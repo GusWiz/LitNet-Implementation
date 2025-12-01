@@ -55,18 +55,18 @@ while i < ADgrace + FMgrace:
         logger.info(f"Training progress: {i}/{ADgrace + FMgrace}")
     L.curr_packet = packet
     rmse = L.proc_next_packet()
-    if rmse > threshold:
-        threshold = rmse
-        logger.info(f"New maximum RMSE found. Updated threshold: {rmse}")
         
     if rmse == -1:
         continue
     RMSEs.append(rmse)
 
-logger.info(f"The anomaly threshold has been successfully set at {threshold}")
+mean = np.mean(rmse)
+std_rmse = np.std(rmse)
+k = 2
+
+threshold = mean - (k * std_rmse)
 logger.info("Beginning execution phase")
-
-
+logger.info(f"Threshold range set at {threshold:.6f} (mean : {mean:.6f}, std : {std_rmse:.6f}, k={k})")
 # Here we process (train/execute) each individual packet.
 # In this way, each observation is discarded after performing process() method.
 while True:
