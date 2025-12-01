@@ -1,17 +1,18 @@
 #Check if cython code has been compiled
 import os
 import subprocess
+from loguru import logger
 
 use_extrapolation=False #experimental correlation code
 if use_extrapolation:
-    print("Importing AfterImage Cython Library")
+    logger.info("Importing AfterImage Cython Library")
     if not os.path.isfile("AfterImage.c"): #has not yet been compiled, so try to do so...
         cmd = "python setup.py build_ext --inplace"
         subprocess.call(cmd,shell=True)
 #Import dependencies
 import netStat as ns
 import numpy as np
-print("Importing Scapy Library")
+logger.info("Importing Scapy Library")
 from scapy.all import *
 import os.path
 import subprocess
@@ -83,8 +84,7 @@ class FE:
                     srcIP = packet.src  # src MAC
                     dstIP = packet.dst  # dst MAC
         except AttributeError as e:
-            print(e)
-            print("Continuing to next packet")
+            logger.exception(f"Error parsing packet: {e}")
 
         # try:
         #     print(f'IPtype: {IPtype}, srcMAC: {srcMAC}, dstMAC: {dstMAC}, srcIP: {srcIP}, dstIP: {dstIP}, srcproto: {srcproto}, dstproto: {dstproto}')
@@ -99,7 +99,7 @@ class FE:
                                                 float(timestamp)), srcIP
         
         except Exception as e:
-            print(e)
+            logger.exception(f"Feature extraction failed: {e}")
             return []
 
 

@@ -5,6 +5,7 @@ from queue import Queue
 import threading
 import time
 from iptables import block_ip, unblock_ip
+from loguru import logger
 
 ##############################################################################
 # Kitsune a lightweight online network intrusion detection system based on an ensemble of autoencoders (kitNET).
@@ -29,9 +30,11 @@ blocked_ips = set() #currently blocked IPs
 unblock_schedule = {} #IP -> unblock time
 
 # Build Litsune
+logger.info("Initializing Litsune engine")
 L = Litsune(max_autoencoder_size=maxAE,FM_grace_period=FMgrace,AD_grace_period=ADgrace)
 
 capture_interface = input("Please input the interface to monitor traffic from: ")
+logger.info(f"Starting capture on interface: {capture_interface}")
 
 # Set up capture and begin listener thread
 packet_queue = Queue(maxsize=1000)
@@ -49,19 +52,19 @@ while i < ADgrace + FMgrace:
     packet = packet_queue.get()
     i += 1
     if i % 1000 == 0:
-        print(i)
+        logger.info(f"Training progress: {i}/{ADgrace + FMgrace}")
     L.curr_packet = packet
     rmse = L.proc_next_packet()
     if rmse > threshold:
         threshold = rmse
-        print(f"new maximum rmse found for threshold: {rmse}")
+        logger.info(f"New maximum RMSE found. Updated threshold: {rmse}")
         
     if rmse == -1:
         continue
     RMSEs.append(rmse)
 
-print(f"The anomaly threshold has been successfully set at {threshold}")
-print("Beginning execution phase")
+logger.info(f"The anomaly threshold has been successfully set at {threshold}")
+logger.info("Beginning execution phase")
 
 
 # Here we process (train/execute) each individual packet.
@@ -79,30 +82,30 @@ while True:
             del unblock_schedule[ip]'''
 
     if i % 1000 == 0:
-        print(i)
+        logger.info(f"Execution progress: {i}")
     L.curr_packet = packet
     rmse = L.proc_next_packet()
     if rmse == -1:
         continue
     if rmse > threshold:
-        print(L.curr_packet)
-        print(f"RMSE for this packet is: {rmse}")
+        logger.warning(f"Anomolous packet RMSE for this packet is: {rmse}")
+        logger.warning(f"Packet details: {L.curr_packet}")
         L.update_anomList()
         #check count of anomalies for this source IP
         src_ip = L.currentSrc
         if L.anomList[src_ip] >= BLOCK_THRESHOLD:
             if src_ip not in blocked_ips:
-                print(f"[ALERT] Source IP {src_ip} has reached {L.anomList[src_ip]} threshold.")
+                logger.warning(f"[ALERT] Source IP {src_ip} has reached {L.anomList[src_ip]} threshold.")
                 block_ip(src_ip)
                 blocked_ips.add(src_ip)
                 unblock_schedule[src_ip] = time.time() + BLOCK_DURATION
-                print(f"[BLOCKED] {src_ip} for 60 seconds")
+                logger.warning(f"[BLOCKED] {src_ip} for 60 seconds")
 
     RMSEs.append(rmse)
     if (i > 25000):
         break
 stop = time.time()
-print("Complete. Time elapsed: "+ str(stop - start))
+logger.info(f"Monitoring complete. Total runtime: {stop - start:.2f} seconds")
 
 # Halt and join the listener thread
 stop_event.set()
@@ -114,7 +117,7 @@ benignSample = np.log(RMSEs[FMgrace+ADgrace+1:100000])
 logProbs = norm.logsf(np.log(RMSEs), np.mean(benignSample), np.std(benignSample))
 
 # plot the RMSE anomaly scores
-print("Plotting results")
+logger.info("Plotting results")
 from matplotlib import pyplot as plt
 from matplotlib import cm
 plt.figure(figsize=(10,5))
@@ -126,3 +129,5 @@ plt.xlabel("Time elapsed [min]")
 figbar=plt.colorbar()
 figbar.ax.set_ylabel('Log Probability\n ', rotation=270)
 plt.savefig("ExampleOutTest.png")
+logger.info("Plot saved to ExampleOutTest.png")
+logger.info("Program completed successfully.")
